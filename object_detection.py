@@ -65,3 +65,8 @@ while True:
 # Lepaskan resource kamara dan tutup jendela
 cap.release()
 cv2.destroyAllWindows()
+
+
+
+
+
