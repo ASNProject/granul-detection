@@ -9,6 +9,10 @@ from decision_tree import decision_tree
 current_frame = None
 
 
+def button_detection():
+    print("Mulai Deteksi")
+
+
 # Fungsi untuk mengupdate tampilan berdasarkan slider HSV
 def update_image(*args):  # Accept the argument passed by Scale
     global current_frame
@@ -42,18 +46,18 @@ def update_image(*args):  # Accept the argument passed by Scale
     image_label.config(image=img_tk)
     image_label.image = img_tk
 
-    deg_label.config(text=f"Sudut: {angle_degrees:.2f} deg")
-    h_label.config(text=f"Tinggi: {h:.2f} px")
-    w_label.config(text=f"Lebar: {w:.2f} px")
-
+    # deg_label.config(text=f"Sudut: {angle_degrees:.2f} deg")
+    # h_label.config(text=f"Tinggi: {h:.2f} px")
+    # w_label.config(text=f"Lebar: {w:.2f} px")
+    #
     if angle_degrees != 0:
         result = decision_tree(angle_degrees, 1.2)
         if result == "bagus":
             result_label.config(text=f"Bagus", fg="green")
-            result_label.place(x=550, y=570)
+            result_label.place(x=585, y=550)
         else:
             result_label.config(text=f"Tidak Bagus", fg="red")
-            result_label.place(x=550, y=570)
+            result_label.place(x=585, y=550)
 
 
 # Fungsi untuk mendeteksi segitiga terbesar berdasarkan warna
@@ -161,20 +165,37 @@ upper_v_slider = Scale(ui_frame, from_=0, to=255, orient="horizontal", label="Up
 upper_v_slider.set(255)
 upper_v_slider.grid(row=2, column=2)
 
-info_label = tk.Label(ui_frame, text="Hasil: ", font=("Arial", 12), anchor="w")
-info_label.place(x=515, y=480)
+# info_label = tk.Label(ui_frame, text="Hasil: ", font=("Arial", 12), anchor="w")
+# info_label.place(x=515, y=480)
+#
+# deg_label = tk.Label(ui_frame, text="Sudut: 0.00 deg", font=("Arial", 12), anchor="w")
+# deg_label.place(x=515, y=500)
+#
+# h_label = tk.Label(ui_frame, text="Tinggi: 0.00 px", font=("Arial", 12), anchor="w")
+# h_label.place(x=515, y=520)
+#
+# w_label = tk.Label(ui_frame, text="Lebar: 0.00 px", font=("Arial", 12), anchor="w")
+# w_label.place(x=515, y=540)
+#
+result_label = tk.Label(ui_frame, text="Granul tidak Ditemukan", font=("Arial", 20), anchor="w")
+result_label.place(x=515, y=550)
 
-deg_label = tk.Label(ui_frame, text="Sudut: 0.00 deg", font=("Arial", 12), anchor="w")
-deg_label.place(x=515, y=500)
+# Create button for detection
+buttonStart = tk.Button(ui_frame,
+                        text="START",
+                        command=button_detection,
+                        padx=4,
+                        pady=4
+                        )
+buttonStart.place(x=520, y=510)
 
-h_label = tk.Label(ui_frame, text="Tinggi: 0.00 px", font=("Arial", 12), anchor="w")
-h_label.place(x=515, y=520)
-
-w_label = tk.Label(ui_frame, text="Lebar: 0.00 px", font=("Arial", 12), anchor="w")
-w_label.place(x=515, y=540)
-
-result_label = tk.Label(ui_frame, text="Granul tidak Ditemukan", font=("Arial", 18), anchor="w")
-result_label.place(x=515, y=570)
+buttonStop = tk.Button(ui_frame,
+                       text="STOP",
+                       command=button_detection,
+                       padx=4,
+                       pady=4
+                       )
+buttonStop.place(x=620, y=510)
 
 # Mulai stream video
 video_stream()

@@ -3,9 +3,14 @@ import numpy as np
 import tkinter as tk
 from tkinter import Scale
 from PIL import Image, ImageTk
+from decision_tree import decision_tree
 
 # Global variable to store the current frame
 current_frame = None
+
+
+def button_detection():
+    print("Mulai Deteksi")
 
 
 # Fungsi untuk mengupdate tampilan berdasarkan slider HSV
@@ -27,7 +32,7 @@ def update_image(*args):  # Accept the argument passed by Scale
     upper_hsv = np.array([upper_h, upper_s, upper_v])
 
     # Deteksi segitiga terbesar
-    processed_frame = detect_largest_triangle(current_frame.copy(), lower_hsv, upper_hsv)
+    processed_frame, angle_degrees, h, w = detect_largest_triangle(current_frame.copy(), lower_hsv, upper_hsv)
 
     # Resize gambar ke 200x200
     resized_frame = cv2.resize(processed_frame, (720, 480))
@@ -44,6 +49,10 @@ def update_image(*args):  # Accept the argument passed by Scale
 
 # Fungsi untuk mendeteksi segitiga terbesar berdasarkan warna
 def detect_largest_triangle(frame, lower_hsv, upper_hsv):
+    global angle_degrees, h, w
+    angle_degrees = 0  # Initialize angle_degrees to a default value
+    h = 0
+    w = 0
     hsv_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
     mask = cv2.inRange(hsv_frame, lower_hsv, upper_hsv)
     contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
@@ -77,7 +86,7 @@ def detect_largest_triangle(frame, lower_hsv, upper_hsv):
                     2)
         cv2.putText(frame, "Granul", (x, y - 80), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
 
-    return frame
+    return frame, angle_degrees, h, w
 
 
 # Fungsi untuk menangani stream video
