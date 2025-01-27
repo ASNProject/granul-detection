@@ -1,21 +1,40 @@
+import time
+
 import cv2
 import numpy as np
 import tkinter as tk
 from tkinter import Scale
+
+import serial
 from PIL import Image, ImageTk
 from decision_tree import decision_tree
 
 # Global variable to store the current frame
 current_frame = None
+arduino_data = None
+
+# Setup serial communication with Arduino
+arduino = serial.Serial(port='/dev/cu.usbserial-A50285BI', baudrate=115200, timeout=1)
+time.sleep(2)
 
 
 def button_detection():
     print("Mulai Deteksi")
 
 
+def send_data(data):
+    arduino.write((data + '\n').encode())  # Kirim data ke Arduino
+
+
+def read_data():
+    if arduino.in_waiting > 0:  # Cek apakah ada data masuk
+        return arduino.readline().decode().strip()  # Baca data yang masuk
+    return None
+
+
 # Fungsi untuk mengupdate tampilan berdasarkan slider HSV
 def update_image(*args):  # Accept the argument passed by Scale
-    global current_frame
+    global current_frame, arduino_data
     if current_frame is None:
         return
 
@@ -50,14 +69,27 @@ def update_image(*args):  # Accept the argument passed by Scale
     # h_label.config(text=f"Tinggi: {h:.2f} px")
     # w_label.config(text=f"Lebar: {w:.2f} px")
     #
-    if angle_degrees != 0:
-        result = decision_tree(angle_degrees, 1.2)
-        if result == "bagus":
-            result_label.config(text=f"Bagus", fg="green")
-            result_label.place(x=585, y=550)
+
+    arduino_data = read_data()
+    if arduino_data:
+        # print(f"Data dari Arduino: {arduino_data}")
+        if arduino_data == "reset":
+            # reset_label.config(text=f"Reset: True")
+            result_label.config(text="Timer/Granul\ntidak Ditemukan", fg="red")
+            send_data("nogranul")
         else:
-            result_label.config(text=f"Tidak Bagus", fg="red")
-            result_label.place(x=585, y=550)
+            # reset_label.config(text=f"Reset: False")
+            timer_result.config(text=f"Timer Result: {arduino_data}")
+            if angle_degrees != 0:
+                result = decision_tree(angle_degrees, float(arduino_data))
+                if result == "bagus":
+                    result_label.config(text=f"Bagus", fg="green", font=("Arial", 32),)
+                    result_label.place(x=560, y=540)
+                    send_data("good")
+                else:
+                    result_label.config(text=f"Tidak Bagus", fg="red", font=("Arial", 32),)
+                    result_label.place(x=560, y=540)
+                    send_data("nogood")
 
 
 # Fungsi untuk mendeteksi segitiga terbesar berdasarkan warna
@@ -177,28 +209,19 @@ upper_v_slider.grid(row=2, column=2)
 # w_label = tk.Label(ui_frame, text="Lebar: 0.00 px", font=("Arial", 12), anchor="w")
 # w_label.place(x=515, y=540)
 #
-result_label = tk.Label(ui_frame, text="Granul tidak Ditemukan", font=("Arial", 20), anchor="w")
-result_label.place(x=515, y=550)
+result_label = tk.Label(ui_frame, text="Granul\ntidak Ditemukan", font=("Arial", 24), anchor="w")
+result_label.place(x=515, y=540)
 
-# Create button for detection
-buttonStart = tk.Button(ui_frame,
-                        text="START",
-                        command=button_detection,
-                        padx=4,
-                        pady=4
-                        )
-buttonStart.place(x=520, y=510)
+timer_result = tk.Label(ui_frame, text='Timer Result: ')
+timer_result.place(x=510, y=500)
 
-buttonStop = tk.Button(ui_frame,
-                       text="STOP",
-                       command=button_detection,
-                       padx=4,
-                       pady=4
-                       )
-buttonStop.place(x=620, y=510)
+# reset_label = tk.Label(ui_frame, text="| Reset: ")
+# reset_label.place(x=650, y=500)
 
 # Mulai stream video
 video_stream()
 
 # Jalankan aplikasi Tkinter
 root.mainloop()
+
+arduino.close()

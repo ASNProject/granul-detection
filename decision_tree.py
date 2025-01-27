@@ -32,7 +32,7 @@ def decision_tree(deg, time):
     y_pred = model.predict(X_test)
 
     # Evaluasi model
-    print("Akurasi: ", metrics.accuracy_score(y_test, y_pred))
+    # print("Akurasi: ", metrics.accuracy_score(y_test, y_pred))
 
     # Prediksi data baru
     new_tangen = deg  # 70
@@ -40,6 +40,6 @@ def decision_tree(deg, time):
     new_input = pd.DataFrame([[new_tangen, new_time]], columns=['tangen', 'time'])
 
     prediction = model.predict(new_input)
-    print(f'Prediksi untuk sudut tangen {new_tangen} dan watku {new_time}: ', prediction[0])
+    # print(f'Prediksi untuk sudut tangen {new_tangen} dan watku {new_time}: ', prediction[0])
 
     return prediction[0]

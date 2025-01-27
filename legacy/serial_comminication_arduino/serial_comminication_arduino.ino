@@ -1,27 +1,35 @@
-const int buttonPin = 0;
-int buttonState = 0;
-
-unsigned long startTime = 0;
-const unsigned long duration = 5000;
-bool isTimerRunning = false;
+int sensor = A0;
+unsigned long timerStart = 0;  
+bool isCounting = false;      
 
 void setup() {
   Serial.begin(115200);
-  pinMode(buttonPin, INPUT_PULLUP);
+  pinMode(sensor, INPUT);
 }
 
 void loop() {
-  buttonState = digitalRead(buttonPin);
+  int result = analogRead(sensor); 
+  unsigned long currentMillis = millis();
 
-  if (buttonState == LOW && !isTimerRunning ) {
-    startTime = millis();
-    isTimerRunning = true;
-    Serial.println("timer-0");
-  } 
-
-  if (isTimerRunning && (millis() - startTime >= duration)) {
-    Serial.println("timer-" + String(duration));
-    isTimerRunning = false;     // Reset flag timer
+  if (result <= 10) {
+    if (!isCounting) {
+      timerStart = currentMillis;
+      isCounting = true;
+    }
+  } else {
+    if (isCounting) {
+      unsigned long elapsedTime = currentMillis - timerStart;
+      Serial.println(elapsedTime / 1000.0, 2);
+      isCounting = false;
+    }
   }
-  delay(50);
+
+  // Hapus comment jika ingin menampilkan hasil kiriman dari python
+//   if (Serial.available() > 0) {
+//     String data = Serial.readString();
+//     Serial.print(";");
+//     Serial.println(data);
+//   }
+
+  delay(100);
 }
